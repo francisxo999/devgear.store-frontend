@@ -1,0 +1,18 @@
+<div class="container">
+  <h1>DevGear Store</h1>
+  
+  @if (!isLoggedIn) {
+    <p>Inicia sesión para comprar tus artículos gamer.</p>
+    <button class="btn-login" (click)="login()">
+      Iniciar Sesión en DevGear
+    </button>
+  } @else {
+    <h2>¡Bienvenido, {{ username }}!</h2>
+    <p>✅ Autenticación exitosa con Microsoft Entra ID.</p>
+    <button class="btn-logout" (click)="logout()">
+      Cerrar Sesión
+    </button>
+  }
+</div>
+
+<router-outlet />
