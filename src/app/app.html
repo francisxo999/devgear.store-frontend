@@ -8,11 +8,20 @@
     </button>
   } @else {
     <h2>¡Bienvenido, {{ username }}!</h2>
-    <p>✅ Autenticación exitosa con Microsoft Entra ID.</p>
+    <p>¡Autenticación exitosa con Microsoft Entra ID!</p>
+    
+    <button class="btn-login" (click)="probarApiGateway()" style="margin-right: 10px; background-color: #28a745;">
+      Consultar Productos (API Gateway)
+    </button>
+
     <button class="btn-logout" (click)="logout()">
       Cerrar Sesión
     </button>
   }
+
+  <button class="btn-login" (click)="registrarProductoPrueba()" style="margin-right: 10px; background-color: #ffc107; color: black;">
+  Registrar Producto (ADMIN)
+</button>
 </div>
 
 <router-outlet />
