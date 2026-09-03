@@ -8,7 +8,7 @@ export const environment = {
     }
   },
   apiConfig: {
-    scopes: ['api://9182d5b6-da2c-4b41-849b-9887785e3cf0/DevGear.Access'],
-    uri: 'http://localhost:8080/api'
+    scopes: ['api://9182d5b6-da2c-4b41-849b-9887785e3cf0/Productos.Read'],
+    uri: 'https://wzb64bpffh.execute-api.us-east-1.amazonaws.com/api'
   }
 };
