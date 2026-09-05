@@ -1,4 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
 import { AccountInfo } from '@azure/msal-browser';
@@ -11,11 +13,26 @@ import { environment } from '../environments/environment';
   templateUrl: './app.html',
   styleUrl: './app.css',
   standalone: true,
-  imports: [RouterOutlet]
+  imports: [RouterOutlet, CommonModule, FormsModule]
 })
 export class App implements OnInit {
   isLoggedIn = false;
+  isAdmin = false;
   username: string | undefined = '';
+
+  perfil: any = null;
+  productos: any[] = [];
+  ultimoProductoCreado: any = null;
+  mensajeError: string = '';
+  cargando = false;
+
+  nuevoProducto = {
+    nombre: '',
+    descripcion: '',
+    precio: null,
+    stock: null,
+    imagenUrl: ''
+  };
 
   constructor(
     private msalService: MsalService,
@@ -40,15 +57,20 @@ export class App implements OnInit {
 
   checkAccount() {
     const accounts: AccountInfo[] = this.msalService.instance.getAllAccounts();
-    console.log('Cuentas activas en caché:', accounts);
 
     if (accounts.length > 0) {
       this.msalService.instance.setActiveAccount(accounts[0]);
       this.isLoggedIn = true;
       this.username = accounts[0].name;
+
+      const claims: any = accounts[0].idTokenClaims;
+      const roles: string[] = claims?.roles || [];
+      this.isAdmin = roles.includes('ADMIN');
+
       this.cdr.detectChanges();
     } else {
       this.isLoggedIn = false;
+      this.isAdmin = false;
     }
   }
 
@@ -63,34 +85,54 @@ export class App implements OnInit {
   }
 
   probarApiGateway() {
-    console.log('Consultando API Gateway...');
+    this.cargando = true;
+    this.mensajeError = '';
     this.productoService.getProductos().subscribe({
-      next: (data) => console.log('¡Éxito! Datos desde AWS:', data),
-      error: (err) => console.error('Fallo en la petición:', err)
+      next: (data: any) => {
+        this.productos = data;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.mensajeError = `Error ${err.status}: ${err.message}`;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
-  registrarProductoPrueba() {
-    const nuevoProducto = {
-      nombre: 'Mouse Gamer RGB DevGear',
-      descripcion: 'Mouse ergonómico de alta precisión',
-      precio: 45.50,
-      stock: 30,
-      imagenUrl: 'https://ejemplo.com/mouse.png'
-    };
-
-    console.log('Enviando producto por POST...');
-    this.productoService.crearProducto(nuevoProducto).subscribe({
-      next: (data) => console.log('¡Producto creado con éxito por ADMIN!', data),
-      error: (err) => console.error('Fallo al crear producto:', err)
+  crearProducto() {
+    this.cargando = true;
+    this.mensajeError = '';
+    this.productoService.crearProducto(this.nuevoProducto).subscribe({
+      next: (data: any) => {
+        this.ultimoProductoCreado = data;
+        this.nuevoProducto = { nombre: '', descripcion: '', precio: null, stock: null, imagenUrl: '' };
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.mensajeError = `Error ${err.status}: ${err.statusText === 'Forbidden' ? 'No tienes permisos de ADMIN para crear productos' : err.message}`;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
   verPerfil() {
-    console.log('Consultando perfil (ms-usuario)...');
+    this.cargando = true;
+    this.mensajeError = '';
     this.usuarioService.getPerfil().subscribe({
-      next: (data) => console.log('Perfil obtenido:', data),
-      error: (err) => console.error('Fallo al obtener perfil:', err)
+      next: (data) => {
+        this.perfil = data;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.mensajeError = `Error ${err.status}: ${err.message}`;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 }
