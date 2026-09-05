@@ -1,6 +1,6 @@
 <div class="container">
   <h1>DevGear Store</h1>
-  
+
   @if (!isLoggedIn) {
     <p>Inicia sesión para comprar tus artículos gamer.</p>
     <button class="btn-login" (click)="login()">
@@ -9,9 +9,13 @@
   } @else {
     <h2>¡Bienvenido, {{ username }}!</h2>
     <p>¡Autenticación exitosa con Microsoft Entra ID!</p>
-    
+
     <button class="btn-login" (click)="probarApiGateway()" style="margin-right: 10px; background-color: #28a745;">
       Consultar Productos (API Gateway)
+    </button>
+
+    <button class="btn-login" (click)="verPerfil()" style="margin-right: 10px; background-color: #17a2b8;">
+      Ver Mi Perfil (ms-usuario)
     </button>
 
     <button class="btn-logout" (click)="logout()">
@@ -20,8 +24,8 @@
   }
 
   <button class="btn-login" (click)="registrarProductoPrueba()" style="margin-right: 10px; background-color: #ffc107; color: black;">
-  Registrar Producto (ADMIN)
-</button>
+    Registrar Producto (ADMIN)
+  </button>
 </div>
 
 <router-outlet />

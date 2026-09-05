@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
 import { AccountInfo } from '@azure/msal-browser';
 import { ProductoService } from './services/producto';
+import { UsuarioService } from './services/usuario';
 import { environment } from '../environments/environment';
 
 @Component({
@@ -19,6 +20,7 @@ export class App implements OnInit {
   constructor(
     private msalService: MsalService,
     private productoService: ProductoService,
+    private usuarioService: UsuarioService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -39,7 +41,7 @@ export class App implements OnInit {
   checkAccount() {
     const accounts: AccountInfo[] = this.msalService.instance.getAllAccounts();
     console.log('Cuentas activas en caché:', accounts);
-    
+
     if (accounts.length > 0) {
       this.msalService.instance.setActiveAccount(accounts[0]);
       this.isLoggedIn = true;
@@ -81,6 +83,14 @@ export class App implements OnInit {
     this.productoService.crearProducto(nuevoProducto).subscribe({
       next: (data) => console.log('¡Producto creado con éxito por ADMIN!', data),
       error: (err) => console.error('Fallo al crear producto:', err)
+    });
+  }
+
+  verPerfil() {
+    console.log('Consultando perfil (ms-usuario)...');
+    this.usuarioService.getPerfil().subscribe({
+      next: (data) => console.log('Perfil obtenido:', data),
+      error: (err) => console.error('Fallo al obtener perfil:', err)
     });
   }
 }
