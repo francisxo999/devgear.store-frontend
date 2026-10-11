@@ -1,0 +1,23 @@
+# {$DOMAIN} viene del archivo .env (ej. 35-169-126-252.sslip.io).
+# Caddy pide y renueva el certificado de Let's Encrypt solo; necesita los puertos 80 y 443 abiertos.
+{$DOMAIN} {
+	root * /srv
+	encode gzip
+
+	# Rutas de Angular (/catalogo, /carrito...) devuelven index.html
+	try_files {path} /index.html
+	file_server
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+	}
+
+	# index.html nunca se cachea; los archivos con hash en el nombre sí
+	@index path /index.html /
+	header @index Cache-Control "no-cache"
+
+	@assets path *.js *.css
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+}

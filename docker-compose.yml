@@ -1,0 +1,19 @@
+services:
+  frontend:
+    build: .
+    container_name: devgear-frontend
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Se define en el archivo .env de la instancia: DOMAIN=35-169-126-252.sslip.io
+      DOMAIN: ${DOMAIN:?Define DOMAIN en el archivo .env}
+    volumes:
+      # Guardan el certificado entre reinicios (evita pedirlo de nuevo cada vez)
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

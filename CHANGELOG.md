@@ -3,3 +3,4 @@
 * v1.2.0: Integración de ProductoService con API Gateway y botones de prueba (consultar productos, registrar producto como ADMIN) para validar el flujo end-to-end.
 * v1.3.0: Integración con ms-usuario para consultar el perfil decodificado del token (nombre, correo, roles, oid).
 * v1.4.0: Reemplazo de resultados por consola con UI real en pantalla (perfil, tabla de productos, producto creado). Formulario real de creación de producto visible solo para usuarios con rol ADMIN.
+* v2.0.0: Rediseño completo del frontend. Login con Microsoft (MSAL) y rutas protegidas por rol (CLIENTE, DESPACHADOR, ADMIN). Catálogo con búsqueda y filtro por categoría, carrito, confirmación de compra, mis órdenes, panel de despachos con cambio de estado, administración de productos, de todas las órdenes y envío de correo, y perfil. Se elimina SSR y msal-angular: ahora es una SPA estática servida con Caddy en HTTPS, con Dockerfile y docker-compose para ec2-frontend.
