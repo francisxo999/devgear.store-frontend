@@ -1,19 +1,18 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { ClpPipe } from '../core/format';
+import { ClpPipe, FechaPipe } from '../core/format';
 import { Orden } from '../core/models';
 import { EstadoBadge } from './estado-badge';
 
 @Component({
   selector: 'dg-orden',
-  imports: [ClpPipe, DatePipe, EstadoBadge],
+  imports: [ClpPipe, FechaPipe, EstadoBadge],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="orden">
       <header class="orden-head">
         <div>
           <h2>Orden #{{ orden().id }}</h2>
-          <p class="muted">{{ orden().fecha | date: 'dd/MM/yyyy HH:mm' }}</p>
+          <p class="muted">{{ orden().fecha | fecha }}</p>
         </div>
         <dg-estado [estado]="orden().estado" />
         <strong class="price">{{ orden().total | clp }}</strong>

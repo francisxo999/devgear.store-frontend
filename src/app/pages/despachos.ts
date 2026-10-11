@@ -1,14 +1,13 @@
-import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ApiService } from '../core/api.service';
 import { describirError } from '../core/errors';
-import { etiquetaEstado } from '../core/format';
+import { FechaPipe, etiquetaEstado } from '../core/format';
 import { Despacho, EstadoDespacho } from '../core/models';
 import { ToastService } from '../core/toast.service';
 
 @Component({
   selector: 'dg-despachos',
-  imports: [DatePipe],
+  imports: [FechaPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-head">
@@ -60,7 +59,7 @@ import { ToastService } from '../core/toast.service';
                 <td>#{{ d.id }}</td>
                 <td>#{{ d.ordenId }}</td>
                 <td class="muted" [attr.title]="d.usuarioId">{{ corto(d.usuarioId) }}</td>
-                <td>{{ d.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ d.fecha | fecha }}</td>
                 <td>
                   <div class="segmented" role="group" [attr.aria-label]="'Estado del despacho ' + d.id">
                     @for (e of estados; track e) {

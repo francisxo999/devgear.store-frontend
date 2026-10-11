@@ -14,6 +14,32 @@ export class ClpPipe implements PipeTransform {
   }
 }
 
+const formatoFecha = new Intl.DateTimeFormat('es-CL', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+});
+
+/**
+ * Los servicios guardan las fechas en UTC y las envían sin zona horaria
+ * ("2026-10-11T00:38:12.123"). Aquí se leen como UTC y se muestran en la hora local del navegador.
+ */
+@Pipe({ name: 'fecha' })
+export class FechaPipe implements PipeTransform {
+  transform(valor: string | null | undefined): string {
+    if (!valor) {
+      return '';
+    }
+    const recortado = valor.replace(/(\.\d{3})\d+/, '$1');
+    const iso = /(Z|[+-]\d{2}:?\d{2})$/i.test(recortado) ? recortado : `${recortado}Z`;
+    const fecha = new Date(iso);
+    return Number.isNaN(fecha.getTime()) ? valor : formatoFecha.format(fecha);
+  }
+}
+
 export const TONOS = ['night', 'cobalt', 'bone', 'mint', 'plum', 'amber'] as const;
 export type Tono = (typeof TONOS)[number];
 

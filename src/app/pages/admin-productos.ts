@@ -69,6 +69,9 @@ import { ToastService } from '../core/toast.service';
           <label class="field field-wide">
             <span>URL de imagen (opcional)</span>
             <input class="input" type="url" formControlName="imagenUrl" placeholder="https://" />
+            @if (invalido('imagenUrl')) {
+              <small class="field-error">La URL admite hasta 255 caracteres. Usa un enlace más corto.</small>
+            }
           </label>
 
           <div class="row-actions field-wide">
@@ -163,7 +166,7 @@ export class AdminProductosPage implements OnInit {
     precio: [0, [Validators.required, Validators.min(1)]],
     stock: [0, [Validators.required, Validators.min(0)]],
     descripcion: ['', [Validators.maxLength(500)]],
-    imagenUrl: [''],
+    imagenUrl: ['', [Validators.maxLength(255)]],
   });
 
   ngOnInit(): void {
