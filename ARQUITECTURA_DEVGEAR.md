@@ -123,3 +123,45 @@ Se recomienda evitar incluir contraseñas, tokens o archivos de configuración c
 La arquitectura de DevGear combina Angular, Spring Boot, MySQL, RabbitMQ, Docker, AWS y Microsoft Entra ID.
 
 Estas tecnologías permiten separar responsabilidades, establecer comunicación entre servicios, gestionar información y proteger el acceso a las funcionalidades de la aplicación.
+
+## 11. Flujo de una compra en DevGear
+
+El proceso de compra permite comprender cómo se integran los diferentes componentes del sistema.
+
+### Etapa 1. Selección de productos
+
+El cliente consulta el catálogo mediante el frontend Angular y selecciona los productos que desea comprar.
+
+Angular realiza solicitudes HTTP al backend para consultar los productos y administrar el carrito.
+
+### Etapa 2. Creación de la orden
+
+Cuando el cliente confirma la compra, el frontend envía una solicitud al microservicio de órdenes a través de la API configurada.
+
+El microservicio procesa la solicitud y registra la orden en su base de datos MySQL.
+
+### Etapa 3. Publicación del evento
+
+Después de crear la orden, el microservicio de órdenes publica un evento de creación de orden mediante RabbitMQ.
+
+RabbitMQ distribuye el mensaje a las colas vinculadas al exchange correspondiente.
+
+### Etapa 4. Procesamiento de los consumidores
+
+Los microservicios que consumen el evento pueden ejecutar sus respectivas responsabilidades:
+
+- **Productos:** actualizar las existencias de los productos comprados.
+- **Despachos:** registrar la información necesaria para gestionar el envío.
+- **Notificaciones:** intentar enviar un correo de confirmación al cliente.
+
+### Etapa 5. Consulta del estado
+
+El usuario puede consultar sus órdenes desde el frontend.
+
+Los usuarios con los permisos correspondientes también pueden consultar y administrar los estados de los despachos.
+
+### Resumen del proceso
+
+Frontend Angular → API Gateway → Microservicio de órdenes → MySQL y RabbitMQ → Microservicios consumidores.
+
+Este flujo combina comunicación HTTP con mensajería asíncrona, permitiendo distribuir responsabilidades entre diferentes servicios.
