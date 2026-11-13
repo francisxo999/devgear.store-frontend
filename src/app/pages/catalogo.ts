@@ -3,7 +3,7 @@ import { ApiService } from '../core/api.service';
 import { CartStore } from '../core/cart.store';
 import { describirError } from '../core/errors';
 import { ClpPipe, iniciales, tonoDe } from '../core/format';
-import { Producto } from '../core/models';
+import { Producto, Recomendacion } from '../core/models';
 import { ToastService } from '../core/toast.service';
 import { Keycap } from '../shared/keycap';
 
@@ -43,6 +43,30 @@ import { Keycap } from '../shared/keycap';
       </div>
     }
 
+    @if (recs().length > 0) {
+      <section class="recs" aria-label="Recomendados para ti">
+        <div class="recs-head">
+          <h2>Recomendados para ti</h2>
+          @if (favoritas().length > 0) {
+            <span class="muted small">Según lo que miras y agregas: {{ favoritas().join(', ') }}</span>
+          }
+        </div>
+        <div class="recs-grid">
+          @for (r of recs(); track r.productoId) {
+            <article class="rec">
+              <dg-keycap [texto]="iniciales(r.nombre)" [tono]="tono(r.categoria)" tamano="md" />
+              <div class="rec-info">
+                <strong>{{ r.nombre }}</strong>
+                <span class="muted small">{{ r.motivo }}</span>
+                <span class="price">{{ r.precio | clp }}</span>
+              </div>
+              <button class="btn btn-sm" type="button" (click)="agregarReco(r)">Agregar</button>
+            </article>
+          }
+        </div>
+      </section>
+    }
+
     @if (cargando()) {
       <p class="empty">Cargando catálogo…</p>
     } @else if (error()) {
@@ -64,7 +88,7 @@ import { Keycap } from '../shared/keycap';
       <div class="grid">
         @for (p of visibles(); track p.id) {
           <article class="product" [class.agotado]="p.stock === 0">
-            <div class="product-art">
+            <div class="product-art" (click)="ver(p)">
               @if (p.imagenUrl && !fallidas().has(p.id)) {
                 <img [src]="p.imagenUrl" [alt]="p.nombre" loading="lazy" (error)="marcarFallida(p.id)" />
               } @else {
@@ -72,7 +96,7 @@ import { Keycap } from '../shared/keycap';
               }
             </div>
 
-            <div class="product-body">
+            <div class="product-body" (click)="ver(p)">
               <span class="tag">{{ p.categoria }}</span>
               <h2 class="product-name">{{ p.nombre }}</h2>
               @if (p.descripcion) {
@@ -111,6 +135,58 @@ import { Keycap } from '../shared/keycap';
       </div>
     }
   `,
+  styles: [
+    `
+      .recs {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-l);
+        padding: 16px 18px;
+        margin-bottom: 22px;
+        box-shadow: var(--shadow);
+      }
+      .recs-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .recs-head h2 {
+        margin: 0;
+        font-size: 1.05rem;
+      }
+      .recs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 12px;
+      }
+      .rec {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--line-soft);
+        border-radius: var(--radius-m);
+      }
+      .rec-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        flex: 1;
+      }
+      .rec-info strong {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .product-art,
+      .product-body {
+        cursor: pointer;
+      }
+    `,
+  ],
 })
 export class CatalogoPage implements OnInit {
   private readonly api = inject(ApiService);
@@ -125,6 +201,9 @@ export class CatalogoPage implements OnInit {
   protected readonly agregando = signal<number | null>(null);
   protected readonly cantidades = signal<Record<number, number>>({});
   protected readonly fallidas = signal<Set<number>>(new Set());
+  protected readonly recs = signal<Recomendacion[]>([]);
+  protected readonly favoritas = signal<string[]>([]);
+  private readonly vistas = new Map<number, number>();
 
   protected readonly iniciales = iniciales;
 
@@ -148,6 +227,43 @@ export class CatalogoPage implements OnInit {
 
   ngOnInit(): void {
     this.cargar();
+    this.cargarRecomendaciones();
+  }
+
+  /** El usuario miró un producto: se avisa a ms-productos (-> Kafka) como máximo 1 vez cada 10 s por producto. */
+  protected ver(p: Producto): void {
+    const ahora = Date.now();
+    if (ahora - (this.vistas.get(p.id) ?? 0) < 10_000) {
+      return;
+    }
+    this.vistas.set(p.id, ahora);
+    this.api.registrarVista(p.id).subscribe({
+      next: () => this.recargarRecomendacionesTras(),
+      error: () => undefined,
+    });
+  }
+
+  protected cargarRecomendaciones(): void {
+    this.api.recomendaciones().subscribe({
+      next: (r) => {
+        this.recs.set(r.recomendaciones);
+        this.favoritas.set(r.categoriasFavoritas);
+      },
+      // Si ms-recomendaciones no responde, simplemente no se muestra la sección.
+      error: () => this.recs.set([]),
+    });
+  }
+
+  protected agregarReco(r: Recomendacion): void {
+    const producto = this.productos().find((p) => p.id === r.productoId);
+    if (producto) {
+      this.agregar(producto);
+    }
+  }
+
+  // Kafka entrega el evento al consumidor casi al instante; se espera un momento y se recalcula.
+  private recargarRecomendacionesTras(): void {
+    setTimeout(() => this.cargarRecomendaciones(), 1500);
   }
 
   protected cargar(): void {
@@ -195,6 +311,7 @@ export class CatalogoPage implements OnInit {
         this.cantidades.update((c) => ({ ...c, [p.id]: 1 }));
         this.agregando.set(null);
         this.cart.refresh().subscribe({ error: () => undefined });
+        this.recargarRecomendacionesTras();
       },
       error: (e: unknown) => {
         this.toast.error(describirError(e));

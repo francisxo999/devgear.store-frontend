@@ -25,6 +25,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/carrito').then((m) => m.CarritoPage),
       },
       {
+        path: 'pago/resultado',
+        loadComponent: () => import('./pages/pago-resultado').then((m) => m.PagoResultadoPage),
+      },
+      {
         path: 'ordenes',
         loadComponent: () => import('./pages/ordenes').then((m) => m.OrdenesPage),
       },
@@ -47,6 +51,11 @@ export const routes: Routes = [
         path: 'admin/ordenes',
         canActivate: [roleGuard('ADMIN')],
         loadComponent: () => import('./pages/admin-ordenes').then((m) => m.AdminOrdenesPage),
+      },
+      {
+        path: 'admin/kafka',
+        canActivate: [roleGuard('ADMIN')],
+        loadComponent: () => import('./pages/admin-kafka').then((m) => m.AdminKafkaPage),
       },
       {
         path: 'admin/correo',

@@ -60,6 +60,7 @@ import { Keycap } from '../shared/keycap';
             <span class="subbar-title">Administración</span>
             <a routerLink="/admin/productos" routerLinkActive="activo">Productos</a>
             <a routerLink="/admin/ordenes" routerLinkActive="activo">Todas las órdenes</a>
+            <a routerLink="/admin/kafka" routerLinkActive="activo">Kafka en vivo</a>
             <a routerLink="/admin/correo" routerLinkActive="activo">Enviar correo</a>
           </nav>
         </div>
