@@ -171,48 +171,75 @@ function mayuscula(texto: string): string {
       </aside>
     }
 
-    @if (recs().length > 0) {
-      <section class="recs" aria-label="Recomendados para ti">
+    @if (recs().length > 0 || tendencia().length > 0) {
+      <section class="recs" aria-label="Recomendados y tendencia">
         <div class="recs-head">
-          <h2>Recomendados para ti</h2>
-          @if (favoritas().length > 0) {
-            <span class="muted small">Según lo que miras y agregas: {{ favoritas().join(', ') }}</span>
-          }
-        </div>
-        <div class="recs-grid">
-          @for (r of recs(); track r.productoId) {
-            <article class="rec">
-              <dg-keycap [texto]="iniciales(r.nombre)" [tono]="tono(r.categoria)" tamano="md" />
-              <div class="rec-info">
-                <strong>{{ r.nombre }}</strong>
-                <span class="muted small">{{ r.motivo }}</span>
-                <span class="price">{{ r.precio | clp }}</span>
-              </div>
-              <button class="btn btn-sm" type="button" (click)="agregarReco(r)">Agregar</button>
-            </article>
-          }
-        </div>
-      </section>
-    }
-
-    @if (tendencia().length > 0) {
-      <section class="recs tend" aria-label="Tendencia ahora">
-        <div class="recs-head">
-          <h2>Tendencia ahora</h2>
-          <span class="muted small">{{ ventana() }} · calculado en vivo con los eventos de Kafka</span>
-        </div>
-        <div class="tend-row">
-          @for (t of tendencia(); track t.productoId; let i = $index) {
-            <button type="button" class="tend-item" (click)="abrirDetalleId(t.productoId)">
-              <span class="rank">{{ i + 1 }}</span>
-              <span class="tend-info">
-                <strong>{{ t.nombre }}</strong>
-                <span class="muted small">{{ t.interacciones }} interacciones</span>
-              </span>
-              <span class="price">{{ t.precio | clp }}</span>
+          <div class="tabs" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              class="tab"
+              [class.on]="vistaActiva() === 'recs'"
+              [attr.aria-selected]="vistaActiva() === 'recs'"
+              [disabled]="recs().length === 0"
+              (click)="vista.set('recs')"
+            >
+              Recomendados para ti
             </button>
+            <button
+              type="button"
+              role="tab"
+              class="tab"
+              [class.on]="vistaActiva() === 'tend'"
+              [attr.aria-selected]="vistaActiva() === 'tend'"
+              [disabled]="tendencia().length === 0"
+              (click)="vista.set('tend')"
+            >
+              Tendencia ahora
+            </button>
+          </div>
+          @if (!plegada()) {
+            @if (vistaActiva() === 'recs' && favoritas().length > 0) {
+              <span class="muted small">Según lo que miras y agregas: {{ favoritas().join(', ') }}</span>
+            } @else if (vistaActiva() === 'tend') {
+              <span class="muted small">{{ ventana() }} · en vivo con los eventos de Kafka</span>
+            }
           }
+          <button type="button" class="plegar" [attr.aria-expanded]="!plegada()" (click)="plegada.set(!plegada())">
+            {{ plegada() ? 'Mostrar' : 'Ocultar' }}
+          </button>
         </div>
+
+        @if (!plegada()) {
+          @if (vistaActiva() === 'recs') {
+            <div class="recs-grid">
+              @for (r of recs(); track r.productoId) {
+                <article class="rec">
+                  <dg-keycap [texto]="iniciales(r.nombre)" [tono]="tono(r.categoria)" tamano="md" />
+                  <div class="rec-info">
+                    <strong>{{ r.nombre }}</strong>
+                    <span class="muted small">{{ r.motivo }}</span>
+                    <span class="price">{{ r.precio | clp }}</span>
+                  </div>
+                  <button class="btn btn-sm" type="button" (click)="agregarReco(r)">Agregar</button>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="tend-row">
+              @for (t of tendencia(); track t.productoId; let i = $index) {
+                <button type="button" class="tend-item" (click)="abrirDetalleId(t.productoId)">
+                  <span class="rank">{{ i + 1 }}</span>
+                  <span class="tend-info">
+                    <strong>{{ t.nombre }}</strong>
+                    <span class="muted small">{{ t.interacciones }} interacciones</span>
+                  </span>
+                  <span class="price">{{ t.precio | clp }}</span>
+                </button>
+              }
+            </div>
+          }
+        }
       </section>
     }
 
@@ -442,6 +469,41 @@ function mayuscula(texto: string): string {
       }
       .fav.on svg {
         fill: currentColor;
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+        padding: 3px;
+        border-radius: 10px;
+        background: var(--line-soft);
+      }
+      .tab {
+        border: 0;
+        border-radius: 8px;
+        padding: 6px 14px;
+        background: transparent;
+        color: var(--slate);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .tab.on {
+        background: var(--surface);
+        color: inherit;
+        box-shadow: 0 1px 3px rgba(15, 27, 42, 0.15);
+      }
+      .tab:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      .plegar {
+        margin-left: auto;
+        border: 0;
+        background: none;
+        color: var(--cobalt);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
       }
       .tend-row {
         display: grid;
@@ -789,6 +851,8 @@ export class CatalogoPage implements OnInit {
   protected readonly tendencia = signal<TendenciaItem[]>([]);
   protected readonly ventana = signal('');
   protected readonly panelAbierto = signal(false);
+  protected readonly vista = signal<'recs' | 'tend'>('recs');
+  protected readonly plegada = signal(false);
   protected readonly buscaCategoria = signal('');
   protected readonly abierta = signal<number | null>(null);
   protected readonly recs = signal<Recomendacion[]>([]);
@@ -810,6 +874,18 @@ export class CatalogoPage implements OnInit {
     this.panelAbierto.set(false);
     this.detalle.set(null);
   }
+
+  // Si la pestaña elegida no tiene datos, se muestra la otra.
+  protected readonly vistaActiva = computed<'recs' | 'tend'>(() => {
+    const v = this.vista();
+    if (v === 'recs' && this.recs().length === 0 && this.tendencia().length > 0) {
+      return 'tend';
+    }
+    if (v === 'tend' && this.tendencia().length === 0 && this.recs().length > 0) {
+      return 'recs';
+    }
+    return v;
+  });
 
   protected readonly relacionados = computed(() => {
     const d = this.detalle();

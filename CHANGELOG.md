@@ -7,3 +7,5 @@
 * v2.0.1: Las imágenes de producto se ajustan al recuadro de la tarjeta, las fechas se muestran en la hora local del navegador (los servicios guardan en UTC) y el formulario de productos valida el largo de la URL de imagen.
 * v2.1.0: Integración con Kafka y Webpay: registro de producto visto, sección "Recomendados para ti", pago con Webpay en el carrito (reemplaza la confirmación directa), pantalla de resultado del pago (aprobado, rechazado, cancelado), aviso de bloqueo antifraude y panel de administración "Kafka en vivo" con métricas y bloqueos.
 * v2.2.0: Catálogo rediseñado: filtros en un panel lateral (búsqueda, orden, precio, disponibilidad, favoritos y categorías con contador), tarjeta que se expande al pasar el cursor, vista rápida del producto, favoritos con evento a Kafka y sección Tendencia ahora en vivo. Mis órdenes muestra una línea de tiempo del despacho y el formulario de administración sugiere las categorías.
+
+* v2.2.1: Recomendados para ti y Tendencia ahora comparten una sola sección con pestañas y un botón para ocultarla, para dejar más espacio a los productos.
