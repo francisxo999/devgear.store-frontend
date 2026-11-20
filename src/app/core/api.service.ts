@@ -18,6 +18,7 @@ import {
   Producto,
   ProductoInput,
   RecomendacionesRespuesta,
+  TendenciaRespuesta,
 } from './models';
 
 /** Todas las llamadas al API Gateway en un solo lugar. El token lo agrega el interceptor. */
@@ -55,6 +56,11 @@ export class ApiService {
   /** El usuario miró un producto: ms-productos publica PRODUCTO_VISTO en Kafka. */
   registrarVista(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/v1/productos/${id}/vista`, null);
+  }
+
+  /** El usuario marcó un favorito: ms-productos publica FAVORITO_AGREGADO en Kafka. */
+  registrarFavorito(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/v1/productos/${id}/favorito`, null);
   }
 
   // ms-carrito
@@ -107,6 +113,10 @@ export class ApiService {
   // ms-recomendaciones
   recomendaciones(): Observable<RecomendacionesRespuesta> {
     return this.http.get<RecomendacionesRespuesta>(`${this.base}/recomendaciones`);
+  }
+
+  tendencia(): Observable<TendenciaRespuesta> {
+    return this.http.get<TendenciaRespuesta>(`${this.base}/recomendaciones/tendencia`);
   }
 
   metricasNavegacion(): Observable<MetricasNavegacion> {

@@ -84,6 +84,20 @@ export interface RecomendacionesRespuesta {
   recomendaciones: Recomendacion[];
 }
 
+export interface TendenciaItem {
+  productoId: number;
+  nombre: string;
+  categoria: string;
+  precio: number;
+  imagenUrl: string | null;
+  interacciones: number;
+}
+
+export interface TendenciaRespuesta {
+  ventana: string;
+  items: TendenciaItem[];
+}
+
 export interface MetricasNavegacion {
   totalEventos: number;
   eventosPorTipo: Record<string, number>;

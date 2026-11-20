@@ -6,6 +6,8 @@ import { ClpPipe } from '../core/format';
 import { Producto, ProductoInput } from '../core/models';
 import { ToastService } from '../core/toast.service';
 
+const CATEGORIAS_SUGERIDAS = ['Periféricos', 'Juegos', 'Sillas', 'Hardware', 'Monitores', 'Audio', 'Streaming', 'Redes'];
+
 @Component({
   selector: 'dg-admin-productos',
   imports: [ReactiveFormsModule, ClpPipe],
@@ -36,7 +38,12 @@ import { ToastService } from '../core/toast.service';
 
           <label class="field">
             <span>Categoría</span>
-            <input class="input" formControlName="categoria" autocomplete="off" />
+            <input class="input" formControlName="categoria" autocomplete="off" list="categorias-sugeridas" />
+            <datalist id="categorias-sugeridas">
+              @for (c of categoriasSugeridas; track c) {
+                <option [value]="c"></option>
+              }
+            </datalist>
             @if (invalido('categoria')) {
               <small class="field-error">La categoría es obligatoria.</small>
             }
@@ -147,6 +154,7 @@ import { ToastService } from '../core/toast.service';
   `,
 })
 export class AdminProductosPage implements OnInit {
+  protected readonly categoriasSugeridas = CATEGORIAS_SUGERIDAS;
   private readonly api = inject(ApiService);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(NonNullableFormBuilder);
