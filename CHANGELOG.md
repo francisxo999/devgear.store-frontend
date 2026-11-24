@@ -9,3 +9,5 @@
 * v2.2.0: Catálogo rediseñado: filtros en un panel lateral (búsqueda, orden, precio, disponibilidad, favoritos y categorías con contador), tarjeta que se expande al pasar el cursor, vista rápida del producto, favoritos con evento a Kafka y sección Tendencia ahora en vivo. Mis órdenes muestra una línea de tiempo del despacho y el formulario de administración sugiere las categorías.
 
 * v2.2.1: Recomendados para ti y Tendencia ahora comparten una sola sección con pestañas y un botón para ocultarla, para dejar más espacio a los productos.
+
+* v2.3.0: Se agregó la página Telemetría en la administración, que muestra por WebSocket las métricas de navegación y pagos en tiempo real.

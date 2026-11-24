@@ -58,6 +58,12 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin-kafka').then((m) => m.AdminKafkaPage),
       },
       {
+        path: 'admin/telemetria',
+        canActivate: [roleGuard('ADMIN')],
+        loadComponent: () =>
+          import('./pages/admin-telemetria').then((m) => m.AdminTelemetriaPage),
+      },
+      {
         path: 'admin/correo',
         canActivate: [roleGuard('ADMIN')],
         loadComponent: () => import('./pages/admin-correo').then((m) => m.AdminCorreoPage),
