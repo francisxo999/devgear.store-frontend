@@ -8,11 +8,12 @@ import { describirError } from '../core/errors';
 import { ClpPipe, iniciales, tonoDe } from '../core/format';
 import { ItemCarrito } from '../core/models';
 import { ToastService } from '../core/toast.service';
-import { Keycap } from '../shared/keycap';
+import { Miniatura } from '../shared/miniatura';
+import { ImagenesStore } from '../core/imagenes.store';
 
 @Component({
   selector: 'dg-carrito',
-  imports: [ClpPipe, Keycap, RouterLink],
+  imports: [ClpPipe, Miniatura, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
       <div class="page-head">
@@ -40,7 +41,7 @@ import { Keycap } from '../shared/keycap';
           <ul class="cart-list">
             @for (item of cart.items(); track item.id) {
               <li class="cart-item">
-                <dg-keycap [texto]="iniciales(item.nombreProducto)" [tono]="tono(item.nombreProducto)" tamano="md" />
+                <dg-miniatura [imagenUrl]="imagenes.porProducto()[item.productoId]" [texto]="iniciales(item.nombreProducto)" [tono]="tono(item.nombreProducto)" [alt]="item.nombreProducto" />
                 <div class="cart-item-info">
                   <strong>{{ item.nombreProducto }}</strong>
                   <span class="muted">{{ item.precioUnitario | clp }} c/u</span>
@@ -88,6 +89,7 @@ export class CarritoPage implements OnInit {
   private readonly toast = inject(ToastService);
   protected readonly cart = inject(CartStore);
   private readonly document = inject(DOCUMENT);
+  protected readonly imagenes = inject(ImagenesStore);
 
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
@@ -98,6 +100,7 @@ export class CarritoPage implements OnInit {
   protected readonly iniciales = iniciales;
 
   ngOnInit(): void {
+    this.imagenes.cargar();
     this.cargar();
     // ¿El antifraude (Kafka) bloqueó a este cliente? Si es así, se avisa antes de intentar pagar.
     this.api.estadoPago().subscribe({

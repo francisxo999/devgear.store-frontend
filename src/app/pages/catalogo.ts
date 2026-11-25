@@ -7,6 +7,7 @@ import { ClpPipe, iniciales, tonoDe } from '../core/format';
 import { Producto, Recomendacion, TendenciaItem } from '../core/models';
 import { ToastService } from '../core/toast.service';
 import { Keycap } from '../shared/keycap';
+import { Miniatura } from '../shared/miniatura';
 
 type Orden = 'relevancia' | 'precio-asc' | 'precio-desc' | 'nombre' | 'nombre-desc';
 
@@ -25,7 +26,7 @@ function mayuscula(texto: string): string {
 
 @Component({
   selector: 'dg-catalogo',
-  imports: [ClpPipe, Keycap],
+  imports: [ClpPipe, Keycap, Miniatura],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-head">
@@ -215,7 +216,7 @@ function mayuscula(texto: string): string {
             <div class="recs-grid">
               @for (r of recs(); track r.productoId) {
                 <article class="rec">
-                  <dg-keycap [texto]="iniciales(r.nombre)" [tono]="tono(r.categoria)" tamano="md" />
+                  <dg-miniatura [imagenUrl]="r.imagenUrl" [texto]="iniciales(r.nombre)" [tono]="tono(r.categoria)" [alt]="r.nombre" />
                   <div class="rec-info">
                     <strong>{{ r.nombre }}</strong>
                     <span class="muted small">{{ r.motivo }}</span>
@@ -230,6 +231,7 @@ function mayuscula(texto: string): string {
               @for (t of tendencia(); track t.productoId; let i = $index) {
                 <button type="button" class="tend-item" (click)="abrirDetalleId(t.productoId)">
                   <span class="rank">{{ i + 1 }}</span>
+                  <dg-miniatura [imagenUrl]="t.imagenUrl" [texto]="iniciales(t.nombre)" [tono]="tono(t.categoria)" [alt]="t.nombre" />
                   <span class="tend-info">
                     <strong>{{ t.nombre }}</strong>
                     <span class="muted small">{{ t.interacciones }} interacciones</span>
@@ -578,7 +580,9 @@ function mayuscula(texto: string): string {
       .modal-art img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        padding: 16px;
+        background: #fff;
       }
       .modal-info {
         display: flex;
